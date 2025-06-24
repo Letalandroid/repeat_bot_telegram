@@ -1,3 +1,5 @@
 *-lock.yaml
 node_modules/
 .env
+.replit
+*-lock.json
