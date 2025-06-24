@@ -1,17 +1,3 @@
-// api/webhook.js
-import { Telegraf } from "telegraf";
-
-const bot = new Telegraf(process.env.KEY_BOT);
-
-// Variable para almacenar los chat IDs (en producción usa una base de datos)
-const chatIds = new Set();
-
-bot.start((ctx) => {
-  chatIds.add(ctx.chat.id);
-  ctx.reply('Welcome');
-});
-
-// Handler para Vercel
 export default async (req, res) => {
   try {
     if (req.method === 'POST') {

@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/webhook.js": {
+    "src/bot.js": {
       "maxDuration": 10
     }
   }
