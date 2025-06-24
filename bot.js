@@ -1,37 +1,35 @@
+// api/webhook.js
 import { Telegraf } from "telegraf";
-import { config } from "dotenv";
-config()
 
-const bot = new Telegraf(process.env.KEY_BOT)
+const bot = new Telegraf(process.env.KEY_BOT);
 
-// Variable para almacenar los chat IDs de los usuarios
+// Variable para almacenar los chat IDs (en producción usa una base de datos)
 const chatIds = new Set();
 
 bot.start((ctx) => {
-  // Guardar el chat ID del usuario
   chatIds.add(ctx.chat.id);
   ctx.reply('Welcome');
 });
 
-// Función para enviar mensaje a todos los usuarios registrados
-function sendWelcomeToAll() {
-  chatIds.forEach(chatId => {
-    bot.telegram.sendMessage(chatId, 'Welcome')
-      .catch(err => {
-        console.log(`Error enviando mensaje a ${chatId}:`, err.message);
-        // Remover chat IDs inválidos (usuarios que bloquearon el bot)
-        if (err.response && err.response.error_code === 403) {
-          chatIds.delete(chatId);
-        }
+// Handler para Vercel
+export default async (req, res) => {
+  try {
+    if (req.method === 'POST') {
+      // Procesar actualización de Telegram
+      await bot.handleUpdate(req.body);
+      res.status(200).json({ ok: true });
+    } else if (req.method === 'GET') {
+      // Endpoint para enviar mensajes programados
+      chatIds.forEach(chatId => {
+        bot.telegram.sendMessage(chatId, 'Welcome')
+          .catch(err => console.log(`Error: ${err.message}`));
       });
-  });
-}
-
-// Enviar mensaje cada 5 minutos (300,000 milisegundos)
-setInterval(sendWelcomeToAll, 1 * 10 * 1000);
-
-bot.launch();
-
-// Manejar cierre del proceso
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+      res.status(200).json({ message: 'Messages sent' });
+    } else {
+      res.status(405).json({ error: 'Method not allowed' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
