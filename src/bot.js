@@ -27,8 +27,10 @@ function sendWelcomeToAll() {
   });
 }
 
+const interval = 1 * 10 * 1000;
+
 // Enviar mensaje cada 5 minutos (300,000 milisegundos)
-setInterval(sendWelcomeToAll, 1 * 10 * 1000);
+setInterval(sendWelcomeToAll, interval);
 
 bot.launch();
 
