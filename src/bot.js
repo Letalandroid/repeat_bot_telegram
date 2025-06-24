@@ -1,6 +1,15 @@
 import { Telegraf } from "telegraf";
 import { config } from "dotenv";
+import http from 'http';
 config()
+
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.write("I'm alive");
+  res.end();
+}).listen(8080, () => {
+  console.log('Keep alive server running on port 8080');
+});
 
 const bot = new Telegraf(process.env.KEY_BOT)
 
