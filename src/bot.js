@@ -13,6 +13,18 @@ bot.start((ctx) => {
   ctx.reply('Welcome');
 });
 
+// Comando para detener mensajes automáticos
+bot.command('stop', (ctx) => {
+  stopInterval();
+  ctx.reply('Mensajes automáticos detenidos');
+});
+
+// Comando para reiniciar mensajes automáticos
+bot.command('restart', (ctx) => {
+  restartInterval();
+  ctx.reply('Mensajes automáticos reiniciados');
+});
+
 // Función para enviar mensaje a todos los usuarios registrados
 function sendWelcomeToAll() {
   chatIds.forEach(chatId => {
@@ -29,11 +41,35 @@ function sendWelcomeToAll() {
 
 const interval = 1 * 10 * 1000;
 
-// Enviar mensaje cada 5 minutos (300,000 milisegundos)
-setInterval(sendWelcomeToAll, interval);
+// Iniciar el intervalo y guardar la referencia
+const intervalId = setInterval(sendWelcomeToAll, interval);
+
+// Función para cancelar el intervalo
+function stopInterval() {
+  clearInterval(intervalId);
+  console.log('Intervalo cancelado');
+}
+
+// Función para reiniciar el intervalo
+function restartInterval() {
+  clearInterval(intervalId);
+  const newIntervalId = setInterval(sendWelcomeToAll, interval);
+  console.log('Intervalo reiniciado');
+  return newIntervalId;
+}
 
 bot.launch();
 
 // Manejar cierre del proceso
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once('SIGINT', () => {
+  stopInterval(); // Cancelar el intervalo antes de cerrar
+  bot.stop('SIGINT');
+});
+
+process.once('SIGTERM', () => {
+  stopInterval(); // Cancelar el intervalo antes de cerrar
+  bot.stop('SIGTERM');
+});
+
+// Exportar funciones para uso externo (opcional)
+export { stopInterval, restartInterval };
